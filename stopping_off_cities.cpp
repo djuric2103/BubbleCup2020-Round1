@@ -43,17 +43,15 @@ void findVertices(vector<vector<int>> adj, int s, int d) {
 } 
   
 int main(){ 
-    int n;
+    int n, l, r, s, d;
     cin >> n;
     vector<vector<int> > g(n); 
-    int l, r;
     while(true){
         cin >> l >> r;
         if(l == -1 && r == -1) break;
         g[l].push_back(r);
         g[r].push_back(l);
     }
-    int s, d;
     cin >> s >> d;
     findVertices(g, s, d); 
     vector<int> out;
