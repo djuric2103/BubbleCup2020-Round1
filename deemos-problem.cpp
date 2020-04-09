@@ -5,12 +5,13 @@ string give_string(int diff[], int m){
     ostringstream os;
     int min = diff[0];
     for(int i = 1; i< m;i++) {
+        if(diff[i] == 0){min = 0; break;}
         if (diff[i] < min)
             min = diff[i];
     }
     for(int i = 0; i < m; i++){
         diff[i] = diff[i] - min;
-        os << diff[i] <<'\t';
+        os << diff[i] <<' ';
     }
     return os.str();
 }
@@ -37,6 +38,8 @@ int countSubarrays(std::vector<int> arr, int m) {
 }
 
 int main(void) {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
     int n, m;
     cin >> n>> m;
     vector<int> arr;
