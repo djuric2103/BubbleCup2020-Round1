@@ -1,15 +1,9 @@
 #include <bits/stdc++.h> 
 using namespace std; 
 vector<bool> canReach(10000, false);
-unordered_set<int> allNodes;
  
-void addVertices(vector<int> v){ 
-    for (int i = 0; i < v.size(); i++){  
-        if(!canReach[v[i]]){	
-            canReach[v[i]] = true;
-            allNodes.insert(v[i]);
-        }
-    } 
+inline void addVertices(vector<int> v){ 
+    for (int i = 0; i < v.size(); i++) canReach[v[i]] = true;
 } 
   
 bool notOnPath(int node, vector<int> v) { 
@@ -58,12 +52,8 @@ int main(){
     }
     cin >> s >> d;
     findVertices(g, s, d); 
-    vector<int> out;
-    for(auto u:allNodes)
-        out.push_back(u);
-    sort(out.begin(), out.end());
-    for(auto u : out){
-        cout << u << endl;
-    }
+    for(int i = 0; i < n; i++)
+        if(canReach[i])
+            cout << i << '\n';
     return 0; 
 }   
