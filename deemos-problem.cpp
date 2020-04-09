@@ -8,7 +8,7 @@ void reduce(vector<int>& diff){
         if(diff[i] == 0) return;
         if (diff[i] < min) min = diff[i];
     }
-    if(min != 0) for(int i = 0; i < n; i++) diff[i] -= min;
+    for(int i = 0; i < n; i++) diff[i] -= min;
 }
 
 int countSubarrays(vector<int>& arr, const int m) {
