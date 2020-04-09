@@ -39,7 +39,7 @@ void findVertices(vector<vector<int>> adj, int s, int d) {
 } 
   
 int main(){ 
-	ios_base::sync_with_stdio(false);
+    ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     int n, l, r, s, d;
     cin >> n;
