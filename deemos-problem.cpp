@@ -11,7 +11,7 @@ void reduce(vector<int>& diff){
     for(int i = 0; i < m; i++) diff[i] = diff[i] - min;
 }
 
-int countSubarrays(std::vector<int> arr, int m) {
+int countSubarrays(vector<int> arr, int m) {
     vector<int> diff(m, 0);
     std::map<vector<int>, int> map;
 
