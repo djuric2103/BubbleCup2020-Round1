@@ -3,12 +3,9 @@
 using namespace std;
 
 
-int reduce(vector<int>& diff){
-    const int n = diff.size();
-    int min = MAX;
-    for(int i = 0; i < n; i++) if (diff[i] < min) min = diff[i];
+inline int reduce(vector<int>& diff){
     int pos = 0;
-    for(int i = 0; i < n; i++) if(diff[i] -= min > 0) pos++;  
+    for(int i = 0; i < diff.size(); i++) if(--diff[i] > 0) pos++;  
     return pos;
 }
 
