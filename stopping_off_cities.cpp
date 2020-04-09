@@ -2,11 +2,13 @@
 using namespace std; 
 vector<bool> canReach(10000, false);
 unordered_set<int> allNodes;
-
+ 
 void addVertices(vector<int> v){ 
     for (int i = 0; i < v.size(); i++){  
-        canReach[v[i]] = true;
-        allNodes.insert(v[i]);
+        if(!canReach[v[i]]){	
+            canReach[v[i]] = true;
+            allNodes.insert(v[i]);
+        }
     } 
 } 
   
@@ -43,6 +45,8 @@ void findVertices(vector<vector<int>> adj, int s, int d) {
 } 
   
 int main(){ 
+	ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
     int n, l, r, s, d;
     cin >> n;
     vector<vector<int> > g(n); 
@@ -62,4 +66,4 @@ int main(){
         cout << u << endl;
     }
     return 0; 
-} 
+}   
