@@ -1,38 +1,28 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-string give_string(int diff[], int m){
-    ostringstream os;
+void reduce(vector<int>& diff){
+    const int m = diff.size();
     int min = diff[0];
     for(int i = 1; i< m;i++) {
-        if(diff[i] == 0){min = 0; break;}
-        if (diff[i] < min)
-            min = diff[i];
+        if(diff[i] == 0) return;
+        if (diff[i] < min) min = diff[i];
     }
-    for(int i = 0; i < m; i++){
-        diff[i] = diff[i] - min;
-        os << diff[i] <<' ';
-    }
-    return os.str();
+    for(int i = 0; i < m; i++) diff[i] = diff[i] - min;
 }
 
 int countSubarrays(std::vector<int> arr, int m) {
-    vector<string> vec;
-    int diff[m];
-    for(int i = 0; i < m; i++)
-        diff[i] = 0;
+    vector<int> diff(m, 0);
+    std::map<vector<int>, int> map;
 
-    vec.push_back(give_string(diff, m));
-    for (int i = 0; i < arr.size(); i++) {
-        diff[arr[i] - 1]++;
-        vec.push_back(give_string(diff, m));
-    }
+    map[diff]++;
 
-    std::map<string, int> map;
     int result = 0;
-    for (string x : vec) {
-        result += map[x];
-        map[x]++;
+    const int n = arr.size();
+    for (int i = 0; i < n; i++) {
+        diff[arr[i] - 1]++;
+        reduce(diff);
+        result += map[diff]++;
     }
     return result;
 }
@@ -48,6 +38,6 @@ int main(void) {
         cin>>t;
         arr.push_back(t);
     }
-    cout << countSubarrays(arr, m) << endl;
+    cout << countSubarrays(arr, m) << "\n";
     return 0;
 }
