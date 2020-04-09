@@ -3,15 +3,15 @@ using namespace std;
 
 void reduce(vector<int>& diff){
     const int m = diff.size();
-    int min = diff[0];
-    for(int i = 1; i< m;i++) {
-        if(diff[i] == 0) return;
+    int min = 1 << 20;
+    for(int i = 0; i< m;i++) {
+        if(diff[i] == 0){min = 0; break;}
         if (diff[i] < min) min = diff[i];
     }
-    for(int i = 0; i < m; i++) diff[i] = diff[i] - min;
+    if(min != 0) for(int i = 0; i < m; i++) diff[i] = diff[i] - min;
 }
 
-int countSubarrays(vector<int> arr, int m) {
+int countSubarrays(std::vector<int> arr, int m) {
     vector<int> diff(m, 0);
     std::map<vector<int>, int> map;
 
@@ -21,7 +21,7 @@ int countSubarrays(vector<int> arr, int m) {
     const int n = arr.size();
     for (int i = 0; i < n; i++) {
         diff[arr[i] - 1]++;
-        reduce(diff);
+        if(diff[arr[i] - 1] == 1) reduce(diff);
         result += map[diff]++;
     }
     return result;
