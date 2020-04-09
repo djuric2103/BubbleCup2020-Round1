@@ -27,7 +27,7 @@ int countSubarrays(vector<int> arr, int m) {
     return result;
 }
 
-int main(void) {
+int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     int n, m;
