@@ -4,14 +4,14 @@ using namespace std;
 void reduce(vector<int>& diff){
     const int m = diff.size();
     int min = 1 << 20;
-    for(int i = 0; i< m;i++) {
+    for(int i = 0; i< m; i++) {
         if(diff[i] == 0){min = 0; break;}
         if (diff[i] < min) min = diff[i];
     }
-    if(min != 0) for(int i = 0; i < m; i++) diff[i] = diff[i] - min;
+    if(min != 0) for(int i = 0; i < m; i++) diff[i] -= min;
 }
 
-int countSubarrays(std::vector<int> arr, int m) {
+int countSubarrays(vector<int> arr, int m) {
     vector<int> diff(m, 0);
     std::map<vector<int>, int> map;
 
