@@ -2,7 +2,7 @@
 using namespace std;
 typedef struct treap_node * p_treap_node;
 typedef struct list_node * p_list_node;
-using UMap = std::unordered_map<p_list_node, p_treap_node&>;
+using UMap = std::unordered_map<p_list_node, p_treap_node>;
 UMap listToTreap;
 
 struct treap_node {
@@ -16,7 +16,11 @@ struct treap_node {
 
 p_treap_node create_treap_node (int key, int prior, p_list_node list_node){
     p_treap_node s = new treap_node(key, prior, list_node, 0);
-    if(list_node != nullptr) listToTreap.insert({list_node, s});
+    if(list_node != nullptr) {
+        //listToTreap.erase(list_node);
+        listToTreap.insert({list_node, s});
+        //listToTreap[list_node] = s;
+    }
     return s;
 }
 
@@ -24,10 +28,22 @@ struct list_node{
     int index;
     int size;
     bool deleted;
+    //string name;
     list_node *prev, *next;
     list_node(){};
     list_node(int index, int size, bool deleted) : index(index), size(size),prev(NULL), next(NULL), deleted(deleted) {};
+    //list_node(int index, int size, string name,bool deleted) : index(index), size(size), name(name), prev(NULL), next(NULL), deleted(deleted) {};
+
 };
+
+p_treap_node create_treap_node (p_list_node list_node){
+    p_treap_node s = new treap_node(list_node -> size, list_node -> index, list_node, 0);
+    //listToTreap.erase(list_node);
+    listToTreap.insert({list_node, s});
+    //listToTreap[list_node] = s;
+    cout << "INSERTED "<<list_node << '\t' << s << endl;
+    return s;
+}
 
 
 struct Treap {
@@ -66,12 +82,14 @@ private:
             merge(r->l, l, r->l), t = r;
     }
 
-    void erase(p_treap_node &t, int key) {
-        if (t->key == key)
+    /*void erase(p_treap_node &t, int key) {
+        if (t->key == key) {
+            listToTreap.erase(t->list_node);
             merge(t, t->l, t->r);
+        }
         else
             erase(key < t->key ? t->l : t->r, key);
-    }
+    }*/
 
     void print(p_treap_node curr) {
         if (curr) {
@@ -101,15 +119,15 @@ public:
     void insert(p_treap_node it) {
         insert(root, it);
     }
-    void erase(int key) {
+    /*void erase(int key) {
         erase(root, key);
-    }
+    }*/
     p_treap_node &getFirst(int size) {
         getFirst(root, size);
     }
     void erase_and_join(p_treap_node &s, int n_key, int n_prior, p_list_node l_node) {
         int o_key = s->key, o_prior = s->prior;
-        merge(s, s->l, s->r);
+        erase(s);
         p_treap_node newNode =create_treap_node(o_key + n_key, min(n_prior, o_prior), l_node);
         insert(newNode);
         //return newNode;
@@ -117,8 +135,8 @@ public:
     void erase_and_join(p_treap_node &s, p_treap_node &p,int n_key, int n_prior, p_list_node l_node) {
         int k = s->key + p-> key + n_key, pri = min(min(s->prior, p -> prior),n_prior);
 
-        merge(s, s->l, s->r);
-        merge(p, p->l, p->r);
+        erase(s);
+        erase(p);
         p_treap_node newNode = create_treap_node(k, pri, l_node);
         //p_treap_node & pnn =newNode;
 
@@ -126,9 +144,27 @@ public:
         //return newNode;
 
     }
+    void erase_and_join(p_treap_node &s, p_list_node l_node) {
+        erase(s);
+        p_treap_node newNode =create_treap_node(l_node);
+        insert(newNode);
+        //return newNode;
+    }
+    void erase_and_join(p_treap_node &s, p_treap_node &p, p_list_node l_node) {
+        erase(s);
+        erase(p);
+        p_treap_node newNode = create_treap_node(l_node);
+        //p_treap_node & pnn =newNode;
+
+        insert(newNode);
+        //return newNode;
+    }
+
     void erase(p_treap_node &s) {
+        listToTreap.erase(s->list_node);
         merge(s, s->l, s->r);
     }
+
     void printLRR(){
         print(root);
     }
@@ -225,11 +261,32 @@ void add_in_list(p_list_node old, p_list_node first, p_list_node second){
     }
 }
 
+p_list_node mergeNodes(p_list_node first, p_list_node second){
+    p_list_node newNode = new list_node(first -> index, first -> size + second -> size + (first -> next != second ? first -> next -> size : 0), true);
+    newNode -> prev = first -> prev;
+    newNode -> next = second -> next;
+    if(newNode -> prev == NULL){
+        head = newNode;
+    }else{
+        newNode -> prev -> next = newNode;
+    }
+    if(newNode -> next != NULL){
+        newNode -> next -> prev = newNode;
+    }
+    return newNode;
+}
+
+void print_list(){
+    for(p_list_node curr = head; curr != NULL; curr = curr->next)
+        cout << "SIZE" << curr -> size << "\tIndex" << curr -> index << "\tDeleted" << curr -> deleted << endl;
+    cout << endl;
+}
 
 void insert(string name, int length, p_treap_node &t_node){
     p_list_node listNode = t_node -> list_node;
     int totalSize = t_node -> key;
-    p_list_node full = new list_node(t_node->prior, length, false);
+    p_list_node full = new list_node(t_node->prior, length,false);
+    nameToList[name] = full;
     t.erase(t_node);
 
     cout << "\t" << totalSize << '\t' << length << endl;
@@ -238,21 +295,36 @@ void insert(string name, int length, p_treap_node &t_node){
     }else{
         p_list_node empty = new list_node(full->index + length,totalSize - length, true);
         cout << empty -> size << '\t'  << empty -> index << endl;
-        t.insert(create_treap_node(empty -> size, empty -> index, empty));
-        cout << "IN TREAP: " << t.getFirst(0) -> key << "\t" << t.getFirst(0) -> prior<<endl;
+        t.insert(create_treap_node(empty));
+        cout << "\nOUT" << endl;
+        cout << "IN TREAP: " << listToTreap.at(empty) -> key << "\t" << listToTreap.at(empty) -> prior <<endl;
         add_in_list(listNode, full, empty);
         cout << "ADDED"<<endl;
     }
 
-    for(p_list_node curr = head; curr != NULL; curr = curr->next)
-        cout << "SIZE" << curr -> size << "\tIndex" << curr -> index << "\tDeleted" << curr -> deleted << endl;
-    cout << endl;
+    print_list();
 }
 
-
-
-void removeSeg(string name){
-    
+void removeSeg(p_list_node listNode){
+    cout << "REMOVE"<< listNode -> size << '\t' << listNode -> index << endl;
+    if((listNode -> prev == NULL || listNode -> prev -> deleted == false) && (listNode -> next == NULL || listNode -> next -> deleted == false)){
+        listNode -> deleted = true;
+        t.insert(create_treap_node(listNode->size, listNode -> index, listNode));
+    }else if ((listNode -> prev != NULL && listNode -> prev -> deleted == true) && (listNode -> next != NULL && listNode -> next -> deleted == true)){
+        p_treap_node& prevInTreap = listToTreap.at(listNode->prev);
+        p_treap_node& nextInTreap = listToTreap.at(listNode->next);
+        p_list_node  newNode = mergeNodes(listNode -> prev, listNode -> next);
+        t.erase_and_join(prevInTreap, nextInTreap, newNode);
+    }else if(listNode -> prev != NULL && listNode -> prev -> deleted == true){
+        p_treap_node& prevInTreap = listToTreap.at(listNode->prev);
+        p_list_node  newNode = mergeNodes(listNode -> prev, listNode);
+        t.erase_and_join(prevInTreap, newNode);
+    }else if(listNode -> next != NULL && listNode -> next -> deleted == true){
+        p_treap_node& nextInTreap = listToTreap.find(listNode->next) -> second;
+        p_list_node  newNode = mergeNodes(listNode, listNode -> next);
+        t.erase_and_join(nextInTreap, newNode);
+    }
+    print_list();
 }
 
 void optimize(){
@@ -274,7 +346,7 @@ void optimize(){
     p_list_node head1 = new list_node(51, 61, "asasd");
     p_treap_node &s = t.getFirst(9);
     listToTreap.insert({head1->name, s});
-    t.erase(listToTreap.find(head1 -> name) -> second);
+    t.erase(listToTreap.at(head1 -> name) -> second);
     t.printLRR();
     cout << endl;
 */
@@ -290,10 +362,11 @@ int main() {
         disk_size = returnInt(a);
         left_space = disk_size;
         t = Treap();
+        nameToList = unordered_map<string, p_list_node>();
+        listToTreap = UMap();
         head = new list_node(0, disk_size, true);
         t.insert(create_treap_node(head -> size, head -> index, head));
         //listToTreap.insert({head, t.getFirst(0)});
-
         while(n--){
             string op;
             cin >> op;
@@ -321,9 +394,13 @@ int main() {
             if(op.compare("remove")==0){
                 string name;
                 cin >> name;
-                if(nameToList.end() == nameToList.find(name)) break;
-                removeSeg(name);
-                break;
+                if(nameToList.find(name) == nameToList.end()) break;
+                p_list_node p = nameToList.find(name) -> second;
+                left_space += p->size;
+                //cout << "HERE" << endl;
+                removeSeg(p);
+                nameToList.erase(name);
+                continue;
             }
             optimize();
         }
@@ -332,3 +409,17 @@ int main() {
 
     return 0;
 }
+
+/*
+8
+8Kb
+insere a1 1Kb
+insere a2 1Kb
+insere a3 1Kb
+insere a4 1Kb
+insere a5 1Kb
+remove a2
+remove a4
+remove a3
+0
+ */
