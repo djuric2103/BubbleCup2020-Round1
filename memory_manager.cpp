@@ -13,7 +13,7 @@ struct treap_node {
     treap_node *l, *r;
     p_list_node list_node;
     treap_node() {}
-    treap_node(long long key, long long prior, p_list_node list_node, long long asd) : key(key), prior(prior), l(NULL), r(NULL), list_node(list_node) {};
+    treap_node(long long key, long long prior, p_list_node list_node) : key(key), prior(prior), l(NULL), r(NULL), list_node(list_node) {};
 };
 
 struct list_node {
@@ -36,7 +36,7 @@ struct Treap {
     p_treap_node notFound;
     p_treap_node root;
     Treap() {
-        notFound = new treap_node(-1,-1, NULL, 1);
+        notFound = new treap_node(-1,-1, NULL);
         root = NULL;
     }
 
@@ -113,7 +113,7 @@ public:
     }
 
     void create_and_insert_node(p_list_node list_node) {
-        p_treap_node s = new treap_node(list_node->size, list_node->index, list_node, 0);
+        p_treap_node s = new treap_node(list_node->size, list_node->index, list_node);
         insert(root, s);
     }
 };
@@ -194,7 +194,7 @@ p_list_node mergeNodes(p_list_node first, p_list_node second) {
 void insert(string name, long long length, p_treap_node &t_node) {
     p_list_node listNode = t_node->list_node;
     long long totalSize = t_node->key;
-    p_list_node full = new list_node(t_node->prior, length, false);
+    p_list_node full = new list_node(t_node-> list_node -> index, length, false);
     nameToList.insert({name, full});
     t.erase(t_node);
 
