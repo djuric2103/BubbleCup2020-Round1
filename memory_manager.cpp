@@ -21,14 +21,12 @@ struct list_node {
     long long index;
     long long size;
     bool deleted;
-    //string name;
     list_node *prev, *next;
 
     list_node() {};
 
     list_node(long long index, long long size, bool deleted) : index(index), size(size), prev(NULL), next(NULL),
                                                    deleted(deleted) {};
-    //list_node(long long index, long long size, string name,bool deleted) : index(index), size(size), name(name), prev(NULL), next(NULL), deleted(deleted) {};
 
 };
 
@@ -53,26 +51,26 @@ private:
         if (!t)
             l = r = NULL;
         else if (key < t->key) {
-            split(t->l, key, l, t->l), r = t;
+            split(t->l, key, l, t->l);
+            r = t;
             put_in_map(r);
         }else {
-            split(t->r, key, t->r, r), l = t;
+            split(t->r, key, t->r, r);
+            l = t;
             put_in_map(l);
         }
     }
 
-    p_treap_node &insert(p_treap_node &t, p_treap_node &it) {
-        //if(it == NULL) cout << "GRESKAAA"<<endl;
+    void insert(p_treap_node &t, p_treap_node it) {
         if (!t) {
             t = it;
             put_in_map(t);
-            return t;
         }else if (it->prior < t->prior) {
-            split(t, it->key, it->l, it->r), t = it;
+            split(t, it->key, it->l, it->r);
+            t = it;
             put_in_map(t);
-            return t;
         }
-        else return insert(it->key < t->key ? t->l : t->r, it);
+        else insert(it->key < t->key ? t->l : t->r, it);
     }
 
 
@@ -82,23 +80,15 @@ private:
             put_in_map(t);
         }
         else if (l->prior < r->prior) {
-            merge(l->r, l->r, r), t = l;
+            merge(l->r, l->r, r);
+            t = l;
             put_in_map(t);
-
         }else {
-            merge(r->l, l, r->l), t = r;
+            merge(r->l, l, r->l);
+            t = r;
             put_in_map(t);
         }
     }
-
-    /*void erase(p_treap_node &t, long long key) {
-        if (t->key == key) {
-            listToTreap.erase(t->list_node);
-            merge(t, t->l, t->r);
-        }
-        else
-            erase(key < t->key ? t->l : t->r, key);
-    }*/
 
     void print(p_treap_node curr) {
         if (curr) {
@@ -125,35 +115,9 @@ private:
     }
 
 public:
-    void insert(p_treap_node it) {
-        insert(root, it);
-    }
-
     p_treap_node &getFirst(long long size) {
         getFirst(root, size);
     }
-
-    /*void erase_and_join(p_treap_node &s, long long n_key, long long n_prior, p_list_node l_node) {
-        long long o_key = s->key, o_prior = s->prior;
-        erase(s);
-        p_treap_node newNode = t.create_and_insert_node(o_key + n_key, min(n_prior, o_prior), l_node);
-        insert(newNode);
-        //return newNode;
-    }
-
-    void erase_and_join(p_treap_node &s, p_treap_node &p, long long n_key, long long n_prior, p_list_node l_node) {
-        long long k = s->key + p->key + n_key, pri = min(min(s->prior, p->prior), n_prior);
-
-        erase(s);
-        erase(p);
-        p_treap_node newNode = t.create_and_insert_node(k, pri, l_node);
-        //p_treap_node & pnn =newNode;
-
-        insert(newNode);
-        //return newNode;
-
-    }*/
-
     void erase_and_join(p_treap_node &s, p_list_node l_node) {
         erase(s);
         create_and_insert_node(l_node);
@@ -194,16 +158,12 @@ public:
 
     void create_and_insert_node(p_list_node list_node) {
         p_treap_node s = new treap_node(list_node->size, list_node->index, list_node, 0);
-        p_treap_node& t = insert(root, s);
-        //reference_wrapper<p_treap_node > as(t);
-
-        //listToTreap.insert({list_node -> index, as});
-        //put_in_map(t);
-
-
+        insert(root, s);
     }
 };
 
+
+bool check_list();
 
 Treap t;
 p_list_node head;
@@ -224,8 +184,8 @@ long long returnNUM(string s) {
     }
 }
 
-void add(long long &curr_size, long long segment_size, long long &left) {
-    long long to_add = min(segment_size - curr_size, left);
+void add(double &curr_size, double segment_size, double &left) {
+    double to_add = min(segment_size - curr_size, left);
     curr_size += to_add;
     left -= to_add;
 }
@@ -242,13 +202,13 @@ void precentage(long long empty, long long full) {
 }
 
 void print_disk() {
-    long long size_of_segment = disk_size / 8;
+    double size_of_segment = disk_size / 8.0;
     long long k = 8;
     p_list_node curr = head;
-    long long left_empty = 0, left_full = 0;
+    double left_empty = 0, left_full = 0;
     while (k--) {
         cout << "[";
-        long long empty = 0, full = 0;
+        double empty = 0, full = 0;
         for (; empty + full != size_of_segment; curr = curr->next) {
             //if(curr -> size < 0)
             //    cout << "HERE" << endl;
@@ -344,7 +304,7 @@ void insert(string name, long long length, p_treap_node &t_node) {
     p_list_node listNode = t_node->list_node;
     long long totalSize = t_node->key;
     p_list_node full = new list_node(t_node->prior, length, false);
-    nameToList[name] = full;
+    nameToList.insert({name, full});
     t.erase(t_node);
 
     //cout << "\t" << totalSize << '\t' << length << endl;
@@ -399,7 +359,7 @@ void delete_from_list(p_list_node l_node) {
 }
 
 void addRestPriorLast() {
-    p_list_node new_node = new list_node(last -> prev -> index + 1, left_space, true);
+    p_list_node new_node = new list_node(last -> prev -> index + last -> prev -> size, left_space, true);
     last -> index = new_node -> index + new_node -> size +1;
     new_node -> prev = last -> prev;
     new_node -> prev -> next = new_node;
@@ -447,7 +407,12 @@ int main() {
             //print_list();
             //cout << i << endl;
             //if(i == 3)
-              //  cout << "Here" << endl;
+            //  cout << "Here" << endl;
+//            if(i == 94)
+//                cout << "HERE" << endl;
+           // if(!check_list()){
+             //   cout << "ERROR WITH INDICES " << i << endl;
+           // }
             string op;
             cin >> op;
             if (op.compare("insere") == 0) {
@@ -500,6 +465,30 @@ int main() {
     }
 
     return 0;
+}
+
+bool check_list() {
+    stack<p_list_node > sta;
+    for (p_list_node curr = head; curr != NULL; curr = curr->next) {
+        sta.push(curr);
+    }
+    for(p_list_node curr = last;  curr != NULL; curr = curr -> prev){
+        if(curr != sta.top()){
+            cout << "GRSKA RAZLICITE LISTE \n";
+        }
+        sta.pop();
+    }
+    if(!sta.empty()){
+        cout << "GRSKA RAZLICITE LISTE 1\n";
+
+    }
+    int max_ind = -1;
+    for(p_list_node curr = head; curr != NULL; curr = curr -> next){
+        if(curr -> index <= max_ind) return false;
+        if(curr -> index > max_ind)
+            max_ind = curr -> index;
+    }
+    return true;
 }
 
 /*
