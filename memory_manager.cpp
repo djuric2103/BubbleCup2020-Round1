@@ -3,7 +3,7 @@
 using namespace std;
 typedef struct treap_node *p_treap_node;
 typedef struct list_node *p_list_node;
-std::unordered_map<p_list_node , reference_wrapper<p_treap_node>> listToTreap;
+unordered_map<p_list_node , reference_wrapper<p_treap_node>> listToTreap;
 
 struct treap_node {
     long long key, prior;
@@ -47,46 +47,46 @@ struct Treap {
     }
 
 private:
-    void split(p_treap_node t, long long key, p_treap_node &l, p_treap_node &r) {
-        if (!t)
+    void split(p_treap_node curr, long long key, p_treap_node &l, p_treap_node &r) {
+        if (curr == NULL)
             l = r = NULL;
-        else if (key < t->key) {
-            split(t->l, key, l, t->l);
-            r = t;
+        else if (key < curr->key) {
+            split(curr->l, key, l, curr->l);
+            r = curr;
             put_in_map(r);
         }else {
-            split(t->r, key, t->r, r);
-            l = t;
+            split(curr->r, key, curr->r, r);
+            l = curr;
             put_in_map(l);
         }
     }
 
-    void insert(p_treap_node &t, p_treap_node it) {
-        if (!t) {
-            t = it;
-            put_in_map(t);
-        }else if (it->prior < t->prior) {
-            split(t, it->key, it->l, it->r);
-            t = it;
-            put_in_map(t);
+    void insert(p_treap_node &curr, p_treap_node it) {
+        if (curr == NULL) {
+            curr = it;
+            put_in_map(curr);
+        }else if (it->prior < curr->prior) {
+            split(curr, it->key, it->l, it->r);
+            curr = it;
+            put_in_map(curr);
         }
-        else insert(it->key < t->key ? t->l : t->r, it);
+        else insert(it->key < curr->key ? curr->l : curr->r, it);
     }
 
 
-    void merge(p_treap_node &t, p_treap_node l, p_treap_node r) {
+    void merge(p_treap_node &curr, p_treap_node l, p_treap_node r) {
         if (l == NULL || r == NULL) {
-            t = l ? l : r;
-            put_in_map(t);
+            curr = l ? l : r;
+            put_in_map(curr);
         }
         else if (l->prior < r->prior) {
             merge(l->r, l->r, r);
-            t = l;
-            put_in_map(t);
+            curr = l;
+            put_in_map(curr);
         }else {
             merge(r->l, l, r->l);
-            t = r;
-            put_in_map(t);
+            curr = r;
+            put_in_map(curr);
         }
     }
 
@@ -106,17 +106,30 @@ private:
         }
     }
 
-    p_treap_node &getFirst(p_treap_node &curr, long long size) {
+    /*p_treap_node &getFirst1(p_treap_node &curr, long long size) {
         if (!curr) {
             return notFound;
         }
         if (curr->key >= size) return curr;
         return getFirst(curr->r, size);
+    }*/
+    p_treap_node &getFirst(p_treap_node &curr, long long size) {
+        if (curr == NULL) {
+            return notFound;
+        }
+        if (curr->key == size) return curr;
+        else if(curr -> key < size) return getFirst(curr -> r, size);
+        //return getFirst(curr->r, size);
+        else {
+            p_treap_node& temp = getFirst(curr->l, size);
+            if (temp == notFound) return curr;
+            else return temp;
+        }
     }
 
 public:
     p_treap_node &getFirst(long long size) {
-        getFirst(root, size);
+        return getFirst(root, size);
     }
     void erase_and_join(p_treap_node &s, p_list_node l_node) {
         erase(s);
@@ -184,31 +197,42 @@ long long returnNUM(string s) {
     }
 }
 
-void add(double &curr_size, double segment_size, double &left) {
+void add(long long &curr_size, long long segment_size, long long &left) {
     double to_add = min(segment_size - curr_size, left);
     curr_size += to_add;
     left -= to_add;
 }
 
 void precentage(long long empty, long long full) {
-    double ratio = ((double)full) / ((double) (empty + full));
-    //cout << ratio;
+    /*double ratio = ((double)full) / ((double) (empty + full));
+    printf("%.2lf",ratio);
     if (ratio >= 0.75)
         cout << "#";
     else if (ratio < 0.25)
         cout << " ";
     else
-        cout << "-";
+        cout << "-";*/
+
+    long long size = disk_size / 8;
+    //cout << size << " " << full << " " << empty << endl;
+    empty = size - full;
+    empty *= 4;
+
+    if (empty <= size) {
+        cout << "[#]";
+    } else if (empty > size && empty <= 3 * size) {
+        cout << "[-]";
+    } else cout << "[ ]";
 }
 
 void print_disk() {
-    double size_of_segment = disk_size / 8.0;
+    long long size_of_segment = disk_size / 8;
     long long k = 8;
     p_list_node curr = head;
-    double left_empty = 0, left_full = 0;
+    long long left_empty = 0, left_full = 0;
     while (k--) {
-        cout << "[";
-        double empty = 0, full = 0;
+        //cout << "[";
+        long long empty = 0, full = 0;
         for (; empty + full != size_of_segment; curr = curr->next) {
             //if(curr -> size < 0)
             //    cout << "HERE" << endl;
@@ -229,7 +253,7 @@ void print_disk() {
             }
         }
         precentage(empty, full);
-        cout << "]";
+        //cout << "]";
     }
     cout << "\n";
 }
@@ -395,24 +419,28 @@ int main() {
         left_space = disk_size;
         t = Treap();
         nameToList = unordered_map<string, p_list_node>();
-        listToTreap = std::unordered_map<p_list_node , reference_wrapper<p_treap_node>> ();
+        listToTreap = unordered_map<p_list_node , reference_wrapper<p_treap_node>> ();
         head = new list_node(0, disk_size, true);
         last = new list_node(disk_size+1, 0, false);
         head -> next = last;
         last -> prev = head;
         t.create_and_insert_node(head);
         //listToTreap.insert({head, t.getFirst(0)});
+        bool optimized = true;
         long long i = 0;
         for (; i < n; i++) {
             //print_list();
             //cout << i << endl;
-            //if(i == 3)
-            //  cout << "Here" << endl;
+            //print_list();
+//            if(i == 15)
+//              cout << "Here" << endl;
 //            if(i == 94)
 //                cout << "HERE" << endl;
            // if(!check_list()){
-             //   cout << "ERROR WITH INDICES " << i << endl;
-           // }
+                //cout << "ERROR WITH INDICES " << i << endl;
+             //   while(1){};
+            //}
+            //print_disk();
             string op;
             cin >> op;
             if (op.compare("insere") == 0) {
@@ -435,8 +463,10 @@ int main() {
                     //print_list();
                     p_treap_node &s1 = t.getFirst(length);
                     insert(name, length, s1);
+                    optimized = true;
                 } else {
                     insert(name, length, s);
+                    optimized = false;
                 }
                 left_space -= length;
 
@@ -450,17 +480,19 @@ int main() {
                 left_space += p->size;
                 removeSeg(p);
                 nameToList.erase(name);
+                if(p-> next != last) optimized = false;
                 continue;
             }
             /*if(i == 16)
                 cout << "HERE" << endl;*/
-            optimize();
+            if(!optimized)optimize();
+            optimized = true;
         }
         //print_list();
         if (i == n) print_disk();
         for(; i<n; i++){
             string temp;
-            getline(std::cin, temp);
+            getline(cin, temp);
         }
     }
 
@@ -474,12 +506,15 @@ bool check_list() {
     }
     for(p_list_node curr = last;  curr != NULL; curr = curr -> prev){
         if(curr != sta.top()){
-            cout << "GRSKA RAZLICITE LISTE \n";
+            //throw "asd";
+            while(1){};
+
         }
         sta.pop();
     }
     if(!sta.empty()){
-        cout << "GRSKA RAZLICITE LISTE 1\n";
+        //throw "asd";
+        while(1){};
 
     }
     int max_ind = -1;
