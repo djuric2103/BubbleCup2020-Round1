@@ -264,9 +264,9 @@ int main() {
     while (1) {
         cin >> n;
         if (n == 0) break;
-        string a;
-        cin >> a;
-        disk_size = returnNUM(a);
+        string disk;
+        cin >> disk;
+        disk_size = returnNUM(disk);
         left_space = disk_size;
         t = Treap();
         nameToList = unordered_map<string, p_list_node>();
@@ -319,10 +319,7 @@ int main() {
             optimized = true;
         }
         if (i == n) print_disk();
-        for(; i<n; i++){
-            string temp;
-            getline(cin, temp);
-        }
+        for(string temp; i<n; i++, getline(cin, temp));
     }
     return 0;
 }
