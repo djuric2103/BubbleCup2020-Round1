@@ -122,7 +122,7 @@ private:
         //return getFirst(curr->r, size);
         else {
             p_treap_node& temp = getFirst(curr->l, size);
-            if (temp == notFound) return curr;
+            if (temp == notFound || temp -> key >= curr -> key) return curr;
             else return temp;
         }
     }
@@ -217,11 +217,12 @@ void precentage(long long empty, long long full) {
     //cout << size << " " << full << " " << empty << endl;
     empty = size - full;
     empty *= 4;
-
+    //cout << "[";
+    //printf("%.4lf", (1 - ((double) empty)/(4*size)));
     if (empty <= size) {
         cout << "[#]";
     } else if (empty > size && empty <= 3 * size) {
-        cout << "[-]";
+        cout <<"[-]";
     } else cout << "[ ]";
 }
 
@@ -432,7 +433,10 @@ int main() {
             //print_list();
             //cout << i << endl;
             //print_list();
-//            if(i == 15)
+            //if(i == 309){
+            //    print_list();
+            //    cout << "Here" << endl;
+            //}
 //              cout << "Here" << endl;
 //            if(i == 94)
 //                cout << "HERE" << endl;
@@ -440,7 +444,7 @@ int main() {
                 //cout << "ERROR WITH INDICES " << i << endl;
              //   while(1){};
             //}
-            //print_disk();
+            //if(i != 0)print_disk();
             string op;
             cin >> op;
             if (op.compare("insere") == 0) {
@@ -490,6 +494,7 @@ int main() {
         }
         //print_list();
         if (i == n) print_disk();
+        //cout << endl;
         for(; i<n; i++){
             string temp;
             getline(cin, temp);
