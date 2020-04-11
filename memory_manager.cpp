@@ -6,6 +6,8 @@ typedef struct list_node *p_list_node;
 using UMap = std::unordered_map<p_list_node, p_treap_node>;
 UMap listToTreap;
 
+
+
 struct treap_node {
     int key, prior;
     treap_node *l, *r;
@@ -20,8 +22,8 @@ struct treap_node {
 
 p_treap_node create_treap_node(int key, int prior, p_list_node list_node) {
     p_treap_node s = new treap_node(key, prior, list_node, 0);
-    if (list_node != nullptr) {
-        //listToTreap.erase(list_node);
+    if (list_node != NULL) {
+        listToTreap.erase(list_node);
         listToTreap.insert({list_node, s});
         //listToTreap[list_node] = s;
     }
@@ -45,7 +47,7 @@ struct list_node {
 
 p_treap_node create_treap_node(p_list_node list_node) {
     p_treap_node s = new treap_node(list_node->size, list_node->index, list_node, 0);
-    //listToTreap.erase(list_node);
+    listToTreap.erase(list_node);
     listToTreap.insert({list_node, s});
     //listToTreap[list_node] = s;
     //cout << "INSERTED "<<list_node << '\t' << s << endl;
@@ -58,8 +60,8 @@ struct Treap {
     p_treap_node root;
 
     Treap() {
-        notFound = create_treap_node(-1, -1, nullptr);
-        root = nullptr;
+        notFound = create_treap_node(-1, -1, NULL);
+        root = NULL;
     }
 
 private:
@@ -90,30 +92,16 @@ private:
             merge(r->l, l, r->l), t = r;
     }
 
-    /*void erase(p_treap_node &t, int key) {
+    void erase(p_treap_node &t, int key) {
         if (t->key == key) {
             listToTreap.erase(t->list_node);
             merge(t, t->l, t->r);
         }
         else
             erase(key < t->key ? t->l : t->r, key);
-    }*/
-
-    void print(p_treap_node curr) {
-        if (curr) {
-            print(curr->l);
-            //cout << curr->key << '\t' << curr->prior << endl;
-            print(curr->r);
-        }
     }
 
-    void print1(p_treap_node curr) {
-        if (curr) {
-            //cout << (curr->key) << '\t' << (curr->prior) << endl;
-            print1(curr->l);
-            print1(curr->r);
-        }
-    }
+
 
     p_treap_node &getFirst(p_treap_node &curr, int size) {
         if (!curr) {
@@ -121,6 +109,22 @@ private:
         }
         if (curr->key >= size) return curr;
         return getFirst(curr->r, size);
+    }
+
+    void print(p_treap_node curr) {
+        if (curr != NULL) {
+            print(curr->l);
+            cout << curr->key << '\t' << curr->prior << endl;
+            print(curr->r);
+        }
+    }
+
+    void print1(p_treap_node curr) {
+        if (curr != NULL) {
+            cout << (curr->key) << '\t' << (curr->prior) << endl;
+            print1(curr->l);
+            print1(curr->r);
+        }
     }
 
 public:
@@ -135,7 +139,7 @@ public:
         getFirst(root, size);
     }
 
-    void erase_and_join(p_treap_node &s, int n_key, int n_prior, p_list_node l_node) {
+    /*void erase_and_join(p_treap_node &s, int n_key, int n_prior, p_list_node l_node) {
         int o_key = s->key, o_prior = s->prior;
         erase(s);
         p_treap_node newNode = create_treap_node(o_key + n_key, min(n_prior, o_prior), l_node);
@@ -153,11 +157,10 @@ public:
 
         insert(newNode);
         //return newNode;
-
-    }
+    }*/
 
     void erase_and_join(p_treap_node &s, p_list_node l_node) {
-        erase(s);
+        //erase(s);
         p_treap_node newNode = create_treap_node(l_node);
         insert(newNode);
         //return newNode;
@@ -177,7 +180,6 @@ public:
         listToTreap.erase(s->list_node);
         merge(s, s->l, s->r);
     }
-
     void printLRR() {
         print(root);
     }
@@ -185,11 +187,16 @@ public:
     void printRLR() {
         print1(root);
     }
+
+
+
 };
 
 
 Treap t;
 p_list_node head;
+
+
 
 unordered_map<string, p_list_node> nameToList;
 int left_space, disk_size;
@@ -296,8 +303,13 @@ p_list_node mergeNodes(p_list_node first, p_list_node second) {
 }
 
 void print_list() {
+    //cout << "ROOT "<<t.root -> key << endl;
     for (p_list_node curr = head; curr != NULL; curr = curr->next)
         cout << "SIZE" << curr->size << "\tIndex" << curr->index << "\tDeleted" << curr->deleted << endl;
+    cout << endl << endl;
+    t.printLRR();
+    cout << endl;
+    t.printRLR();
     cout << endl;
 }
 
@@ -339,10 +351,12 @@ void removeSeg(p_list_node listNode) {
         t.erase_and_join(prevInTreap, nextInTreap, newNode);
     } else if (listNode->prev != NULL && listNode->prev->deleted == true) {
         p_treap_node &prevInTreap = listToTreap.find(listNode->prev) ->second;
+        //t.erase(prevInTreap);
         p_list_node newNode = mergeNodes(listNode->prev, listNode);
         t.erase_and_join(prevInTreap, newNode);
     } else if (listNode->next != NULL && listNode->next->deleted == true) {
         p_treap_node &nextInTreap = listToTreap.find(listNode->next)->second;
+        //t.erase(nextInTreap);
         p_list_node newNode = mergeNodes(listNode, listNode->next);
         t.erase_and_join(nextInTreap, newNode);
     }
@@ -442,6 +456,7 @@ int main() {
 
                 int length = returnInt(t_len);
                 if(length == 1){
+
                     cout << "HERE\n";
                 }
                 if (left_space < 0) {
@@ -486,17 +501,20 @@ int main() {
 
     return 0;
 }
-
 /*
-8
-8Kb
-insere a1 1Kb
-insere a2 1Kb
-insere a3 1Kb
-insere a4 1Kb
-insere a5 1Kb
-remove a2
-remove a4
-remove a3
-0
+13
+40Kb
+insere arq001 5Kb
+insere arq002 5Kb
+insere arq003 5Kb
+insere arq004 5Kb
+insere arq005 5Kb
+insere arq006 5Kb
+insere arq007 5Kb
+insere arq008 5Kb
+remove arq002
+remove arq003
+remove arq007
+insere arq002 1Kb
+insere arq003 14Kb
  */
