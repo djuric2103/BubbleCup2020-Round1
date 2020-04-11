@@ -326,18 +326,19 @@ void insert(string name, int length, p_treap_node &t_node) {
 
 void removeSeg(p_list_node listNode) {
     //cout << "REMOVE"<< listNode -> size << '\t' << listNode -> index << endl;
-    if ((listNode->prev == NULL || listNode->prev->deleted == false) &&
-        (listNode->next == NULL || listNode->next->deleted == false)) {
-        listNode->deleted = true;
-        t.insert(create_treap_node(listNode->size, listNode->index, listNode));
+    if ((listNode->prev == NULL || listNode->prev->deleted == false) && (listNode->next == NULL || listNode->next->deleted == false)) {
+        //listNode->deleted = true;
+        p_list_node newNode = new list_node(listNode -> index, listNode -> size, true);
+        add_in_list(listNode, newNode, newNode);
+        t.insert(create_treap_node(newNode));
     } else if ((listNode->prev != NULL && listNode->prev->deleted == true) &&
                (listNode->next != NULL && listNode->next->deleted == true)) {
-        p_treap_node &prevInTreap = listToTreap.at(listNode->prev);
-        p_treap_node &nextInTreap = listToTreap.at(listNode->next);
+        p_treap_node &prevInTreap = listToTreap.find(listNode->prev) -> second;
+        p_treap_node &nextInTreap = listToTreap.find(listNode->next) -> second;
         p_list_node newNode = mergeNodes(listNode->prev, listNode->next);
         t.erase_and_join(prevInTreap, nextInTreap, newNode);
     } else if (listNode->prev != NULL && listNode->prev->deleted == true) {
-        p_treap_node &prevInTreap = listToTreap.at(listNode->prev);
+        p_treap_node &prevInTreap = listToTreap.find(listNode->prev) ->second;
         p_list_node newNode = mergeNodes(listNode->prev, listNode);
         t.erase_and_join(prevInTreap, newNode);
     } else if (listNode->next != NULL && listNode->next->deleted == true) {
@@ -366,7 +367,7 @@ void delete_from_list(p_list_node l_node) {
 }
 
 void changeLast() {
-    p_list_node new_node = new list_node(last->index, disk_size - left_space, true);
+    p_list_node new_node = new list_node(last->index , disk_size - left_space, true);
     new_node->prev = last->prev;
     if (new_node->prev != NULL) {
         new_node->prev->next = new_node;
@@ -396,7 +397,6 @@ void optimize() {
 }
 
 /*Treap t = Treap();
-
     p_list_node head = new list_node(5, 6, "asd");
     t.insert(create_treap_node(9, 8, &head));
     t.insert(create_treap_node(9, 7, &head));
@@ -406,7 +406,6 @@ void optimize() {
     t.insert(create_treap_node(1, 2, &head));
     t.printLRR();
     cout << endl;
-
     p_list_node head1 = new list_node(51, 61, "asasd");
     p_treap_node &s = t.getFirst(9);
     listToTreap.insert({head1->name, s});
@@ -432,6 +431,7 @@ int main() {
         //listToTreap.insert({head, t.getFirst(0)});
         int i = 0;
         for (; i < n; i++) {
+            print_list();
             string op;
             cin >> op;
             if (op.compare("insere") == 0) {
@@ -439,13 +439,16 @@ int main() {
                 cin >> name;
                 string t_len;
                 cin >> t_len;
+
                 int length = returnInt(t_len);
-                left_space -= length;
+                if(length == 1){
+                    cout << "HERE\n";
+                }
                 if (left_space < 0) {
                     cout << "ERRO: disco cheio\n";
                     break;
                 }
-                p_treap_node &s = t.getFirst(length);
+                p_treap_node& s = t.getFirst(length);
                 //cout << s -> key << endl;
                 if (s == t.notFound) {//|| s -> key < length){
                     //cout << "OPTIMIZATION" << endl;
@@ -455,6 +458,7 @@ int main() {
                 } else {
                     insert(name, length, s);
                 }
+                left_space -= length;
 
                 continue;
             }
@@ -471,6 +475,7 @@ int main() {
             }
             optimize();
         }
+        print_list();
         if (i == n) print_disk();
         for(; i<n; i++){
             string temp;
