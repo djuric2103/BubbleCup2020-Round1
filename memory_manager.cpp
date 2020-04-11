@@ -1,4 +1,3 @@
-#pragma GCC optimize ("O3")
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -25,7 +24,7 @@ struct list_node {
     list_node(long long index, long long size, bool deleted) : index(index), size(size), prev(NULL), next(NULL), deleted(deleted) {};
 };
 
-void put_in_map(p_treap_node &treap_node) {
+inline void put_in_map(p_treap_node &treap_node) {
     if(treap_node == NULL) return;
     listToTreap.erase(treap_node -> list_node);
     reference_wrapper<p_treap_node > a(treap_node);
@@ -72,31 +71,24 @@ private:
     void merge(p_treap_node &curr, p_treap_node l, p_treap_node r) {
         if (l == NULL || r == NULL) {
             curr = l ? l : r;
-            put_in_map(curr);
         }
         else if (l->prior < r->prior) {
             merge(l->r, l->r, r);
             curr = l;
-            put_in_map(curr);
         }else {
             merge(r->l, l, r->l);
             curr = r;
-            put_in_map(curr);
         }
+        put_in_map(curr);
     }
 
     p_treap_node &getFirst(p_treap_node &curr, long long size) {
-        if (curr == NULL) {
-            return notFound;
-        }
+        if (curr == NULL) return notFound;
         if (curr->key == size) return curr;
-        else if(curr -> key < size) return getFirst(curr -> r, size);
-        //return getFirst(curr->r, size);
-        else {
-            p_treap_node& temp = getFirst(curr->l, size);
-            if (temp == notFound || temp -> key >= curr -> key) return curr;
-            else return temp;
-        }
+        if(curr -> key < size) return getFirst(curr -> r, size);
+        p_treap_node& temp = getFirst(curr->l, size);
+        if (temp == notFound || temp -> key >= curr -> key) return curr;
+        return temp;
     }
 
 public:
@@ -133,26 +125,23 @@ p_list_node last;
 unordered_map<string, p_list_node> nameToList;
 long long left_space, disk_size;
 
-long long returnNUM(string s) {
+inline long long returnNUM(string s) {
     long long ind = s.find_first_of('b') - 1;
     long long siz = stoi(s.substr(0, ind));
     switch (s[ind]) {
-        case 'K':
-            return siz;
-        case 'M':
-            return 1024 * siz;
-        case 'G':
-            return 1024 * 1024 * siz;
+        case 'K': return siz;
+        case 'M': return 1024 * siz;
+        case 'G': return 1024 * 1024 * siz;
     }
 }
 
-void add(long long &curr_size, long long segment_size, long long &left) {
+inline void add(long long &curr_size, long long segment_size, long long &left) {
     double to_add = min(segment_size - curr_size, left);
     curr_size += to_add;
     left -= to_add;
 }
 
-void precentage(long long empty, long long full) {
+inline void precentage(long long empty) {
     long long size = disk_size / 8;
     empty *= 4;
     if (empty <= size) {
@@ -170,11 +159,8 @@ void print_disk() {
     while (k--) {
         long long empty = 0, full = 0;
         for (; empty + full != size_of_segment; curr = curr->next) {
-            if (left_empty != 0) {
-                add(empty, size_of_segment - full, left_empty);
-            } else if (left_full != 0) {
-                add(full, size_of_segment - empty, left_full);
-            }
+            if (left_empty != 0) add(empty, size_of_segment - full, left_empty);
+            else if (left_full != 0) add(full, size_of_segment - empty, left_full);
             if (empty + full == size_of_segment) break;
             if (curr->deleted) {
                 left_empty = curr->size;
@@ -184,7 +170,7 @@ void print_disk() {
                 add(full, size_of_segment - empty, left_full);
             }
         }
-        precentage(empty, full);
+        precentage(empty);
     }
     cout << "\n";
 }
@@ -197,30 +183,18 @@ void add_in_list(p_list_node old, p_list_node first, p_list_node second) {
     first->prev = old->prev;
     second->next = old->next;
 
-    if (old->prev == NULL) {
-        head = first;
-    } else {
-        first->prev->next = first;
-    }
-    if (old->next != NULL) {
-        second->next->prev = second;
-    }
+    if (old->prev == NULL) head = first;
+    else first->prev->next = first;
+    if (old->next != NULL) second->next->prev = second;
 }
 
 p_list_node mergeNodes(p_list_node first, p_list_node second) {
-    p_list_node newNode = new list_node(first->index,
-                                        first->size + second->size + (first->next != second ? first->next->size : 0),
-                                        true);
+    p_list_node newNode = new list_node(first->index,first->size + second->size + (first->next != second ? first->next->size : 0),true);
     newNode->prev = first->prev;
     newNode->next = second->next;
-    if (newNode->prev == NULL) {
-        head = newNode;
-    } else {
-        newNode->prev->next = newNode;
-    }
-    if (newNode->next != NULL) {
-        newNode->next->prev = newNode;
-    }
+    if (newNode->prev == NULL) head = newNode;
+    else newNode->prev->next = newNode;
+    if (newNode->next != NULL) newNode->next->prev = newNode;
     return newNode;
 }
 
@@ -231,9 +205,8 @@ void insert(string name, long long length, p_treap_node &t_node) {
     nameToList.insert({name, full});
     t.erase(t_node);
 
-    if (totalSize == length) {
-        add_in_list(listNode, full, full);
-    } else {
+    if (totalSize == length) add_in_list(listNode, full, full);
+    else {
         p_list_node empty = new list_node(full->index + length, totalSize - length, true);
         t.create_and_insert_node(empty);
         add_in_list(listNode, full, empty);
@@ -242,7 +215,6 @@ void insert(string name, long long length, p_treap_node &t_node) {
 
 void removeSeg(p_list_node listNode) {
     if ((listNode->prev == NULL || listNode->prev->deleted == false) && (listNode->next == NULL || listNode->next->deleted == false)) {
-        //listNode->deleted = true;
         p_list_node newNode = new list_node(listNode -> index, listNode -> size, true);
         add_in_list(listNode, newNode, newNode);
         t.create_and_insert_node(newNode);
@@ -260,13 +232,9 @@ void removeSeg(p_list_node listNode) {
     }
 }
 
-
-void delete_from_list(p_list_node l_node) {
-    if (l_node->prev == NULL) {
-        head = l_node->next;
-    }else{
-        l_node -> prev -> next = l_node -> next;
-    }
+inline void delete_from_list(p_list_node l_node) {
+    if (l_node->prev == NULL) head = l_node->next;
+    else l_node -> prev -> next = l_node -> next;
     l_node -> next -> prev = l_node -> prev;
 }
 
@@ -282,7 +250,6 @@ void addRestPriorLast() {
 
 void treap_optimize_pass(p_treap_node p) {
     if (p == NULL) return;
-
     delete_from_list(p->list_node);
     treap_optimize_pass(p->l);
     treap_optimize_pass(p->r);
@@ -326,9 +293,7 @@ int main() {
                 cin >> name;
                 string t_len;
                 cin >> t_len;
-
                 long long length = returnNUM(t_len);
-
                 if (left_space - length < 0) {
                     cout << "ERRO: disco cheio\n";
                     break;
@@ -344,7 +309,6 @@ int main() {
                     optimized = false;
                 }
                 left_space -= length;
-
                 continue;
             }
             if (op.compare("remove") == 0) {
