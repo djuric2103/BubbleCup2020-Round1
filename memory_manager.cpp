@@ -181,11 +181,14 @@ public:
         //p_treap_node &s1 = s;
         //listToTreap.erase(list_node -> index);
         //reference_wrapper<p_treap_node> a{s};
-        //listToTreap.erase(list_node -> index);
+        listToTreap.erase(list_node -> index);
         //listToTreap.insert({list_node -> index, a});
         //p_treap_node as = (listToTreap.find(list_node -> index) -> second).get();
         listToTreap.insert({list_node -> index, t});
-
+        if(list_node -> index == 126){
+            p_treap_node &asd = (listToTreap.find(list_node -> index) ->second) . get();
+            cout << list_node -> index << '\t' <<  asd->key << endl;
+        }
         //cout << "S key "<<s->key <<"WRAP key "<< as->key << endl;
         //if()
 
@@ -226,9 +229,9 @@ void add(int &curr_size, int segment_size, int &left) {
 void precentage(int empty, int full) {
     double ratio = (full) / ((double) (empty + full));
     //cout << ratio << endl;
-    if (ratio > 0.75)
+    if (ratio >= 0.75)
         cout << "#";
-    else if (ratio <= 0.25)
+    else if (ratio < 0.25)
         cout << " ";
     else
         cout << "-";
@@ -258,7 +261,7 @@ void print_disk() {
             }
         }
         precentage(empty, full);
-        cout << "] ";
+        cout << "]";
     }
     cout << "\n";
 }
@@ -353,7 +356,7 @@ void removeSeg(p_list_node listNode) {
         t.erase_and_join(prevInTreap, nextInTreap, newNode);
     } else if (listNode->prev != NULL && listNode->prev->deleted == true) {
         p_treap_node &prevInTreap = (listToTreap.find(listNode->prev ->index) ->second).get();
-        cout << "PREVIOUS" << prevInTreap->key <<"\t" << prevInTreap -> prior << endl;
+        //cout << "PREVIOUS" << prevInTreap->key <<"\t" << prevInTreap -> prior << endl;
         //t.eraseWithKeyAndPriority(prevInTreap -> key, prevInTreap -> size);
         p_list_node newNode = mergeNodes(listNode->prev, listNode);
         t.erase_and_join(prevInTreap, newNode);
@@ -366,39 +369,29 @@ void removeSeg(p_list_node listNode) {
 }
 
 p_list_node last;
-int max_prior = -1;
 
 void delete_from_list(p_list_node l_node) {
     if (l_node->prev == NULL) {
         head = l_node->next;
-        return;
+    }else{
+        l_node -> prev -> next = l_node -> next;
     }
-    if (l_node->next == NULL) {
-        //l_node -> prev -> next = NULL;
-        //it is last node, so no need for change
-        return;
-    }
-    l_node->prev->next = l_node->next;
-    l_node->next->prev = l_node->prev;
+    l_node -> next -> prev = l_node -> prev;
 }
 
-void changeLast() {
-    p_list_node new_node = new list_node(last->index , disk_size - left_space, true);
-    new_node->prev = last->prev;
-    if (new_node->prev != NULL) {
-        new_node->prev->next = new_node;
-    } else {
-        head = new_node;  //never happens
-    }
+void addRestPriorLast() {
+    p_list_node new_node = new list_node(last -> prev -> index + 1, left_space, true);
+    last -> index = new_node -> index + new_node -> size +1;
+    new_node -> prev = last -> prev;
+    new_node -> prev -> next = new_node;
+    new_node -> next = last;
+    last -> prev = new_node;
     t.create_and_insert_node(new_node);
 }
 
 void treap_optimize_pass(p_treap_node p) {
     if (p == NULL) return;
-    if (p->prior > max_prior) {
-        max_prior = p->prior;
-        last = p->list_node;
-    }
+
     delete_from_list(p->list_node);
     treap_optimize_pass(p->l);
     treap_optimize_pass(p->r);
@@ -409,7 +402,7 @@ void optimize() {
     treap_optimize_pass(t.root);
     t = Treap();
     listToTreap = std::unordered_map<int, reference_wrapper<p_treap_node>> ();
-    changeLast();
+    addRestPriorLast();
 }
 
 /*Treap t = Treap();
@@ -443,11 +436,18 @@ int main() {
         nameToList = unordered_map<string, p_list_node>();
         listToTreap = std::unordered_map<int, reference_wrapper<p_treap_node>> ();
         head = new list_node(0, disk_size, true);
+        last = new list_node(disk_size+1, 0, false);
+        head -> next = last;
+        last -> prev = head;
         t.create_and_insert_node(head);
         //listToTreap.insert({head, t.getFirst(0)});
         int i = 0;
         for (; i < n; i++) {
-            print_list();
+            //print_list();
+            //print_list();
+            cout << i << endl;
+            if(i == 25)
+                cout << "Here" << endl;
             string op;
             cin >> op;
             if (op.compare("insere") == 0) {
@@ -457,10 +457,8 @@ int main() {
                 cin >> t_len;
 
                 int length = returnInt(t_len);
-                if(length == 1){
-                    cout << "HERE\n";
-                }
-                if (left_space < 0) {
+
+                if (left_space - length < 0) {
                     cout << "ERRO: disco cheio\n";
                     break;
                 }
@@ -469,6 +467,7 @@ int main() {
                 if (s == t.notFound) {//|| s -> key < length){
                     //cout << "OPTIMIZATION" << endl;
                     optimize();
+                    //print_list();
                     p_treap_node &s1 = t.getFirst(length);
                     insert(name, length, s1);
                 } else {
@@ -488,9 +487,11 @@ int main() {
                 nameToList.erase(name);
                 continue;
             }
+            /*if(i == 16)
+                cout << "HERE" << endl;*/
             optimize();
         }
-        print_list();
+        //print_list();
         if (i == n) print_disk();
         for(; i<n; i++){
             string temp;
@@ -502,7 +503,112 @@ int main() {
 }
 
 /*
-13
+100
+800Kb
+insere arq0 43Kb
+insere arq1 364Kb
+remove arq0
+remove arq1
+insere arq2 89Kb
+insere arq3 331Kb
+insere arq4 17Kb
+remove arq4
+remove arq2
+remove arq3
+insere arq5 344Kb
+insere arq6 213Kb
+insere arq7 121Kb
+insere arq8 35Kb
+remove arq6
+insere arq9 87Kb
+remove arq8
+insere arq10 12Kb
+remove arq5
+insere arq11 132Kb
+remove arq10
+insere arq12 44Kb
+insere arq13 97Kb
+remove arq13
+insere arq14 156Kb
+remove arq7
+insere arq15 35Kb
+insere arq16 16Kb
+remove arq9
+insere arq17 59Kb
+remove arq15
+insere arq18 46Kb
+remove arq16
+insere arq19 85Kb
+insere arq20 61Kb
+insere arq21 85Kb
+remove arq14
+insere arq22 123Kb
+insere arq23 69Kb
+insere arq24 14Kb
+insere arq25 24Kb
+remove arq17
+insere arq26 26Kb
+remove arq19
+insere arq27 20Kb
+insere arq28 76Kb
+insere arq29 18Kb
+remove arq12
+remove arq29
+insere arq30 25Kb
+remove arq24
+remove arq21
+insere arq31 34Kb
+insere arq32 4Kb
+remove arq22
+insere arq33 65Kb
+insere arq34 72Kb
+remove arq34
+remove arq31
+insere arq35 38Kb
+remove arq18
+remove arq28
+remove arq35
+remove arq25
+insere arq36 137Kb
+insere arq37 68Kb
+insere arq38 22Kb
+insere arq39 12Kb
+insere arq40 36Kb
+remove arq37
+insere arq41 87Kb
+insere arq42 33Kb
+insere arq43 5Kb
+insere arq44 22Kb
+insere arq45 17Kb
+insere arq46 4Kb
+remove arq41
+insere arq47 13Kb
+insere arq48 24Kb
+insere arq49 34Kb
+remove arq36
+insere arq50 13Kb
+insere arq51 30Kb
+insere arq52 19Kb
+insere arq53 21Kb
+insere arq54 2Kb
+insere arq55 22Kb
+insere arq56 21Kb
+insere arq57 23Kb
+remove arq39
+remove arq44
+remove arq23
+insere arq58 9Kb
+insere arq59 6Kb
+insere arq60 22Kb
+insere arq61 9Kb
+insere arq62 20Kb
+insere arq63 14Kb
+remove arq20
+remove arq40
+ */
+
+/*
+18
 40Kb
 insere arq001 5Kb
 insere arq002 5Kb
@@ -517,4 +623,9 @@ remove arq003
 remove arq007
 insere arq002 1Kb
 insere arq003 14Kb
+remove arq001
+remove arq004
+remove arq005
+otimiza
+otimiza
  */
