@@ -4,6 +4,9 @@ using namespace std;
 typedef struct treap_node *p_treap_node;
 typedef struct list_node *p_list_node;
 unordered_map<p_list_node , reference_wrapper<p_treap_node>> listToTreap;
+unordered_map<string, p_list_node> nameToList;
+long long left_space, disk_size;
+p_list_node head, last;
 
 struct treap_node {
     long long key, prior;
@@ -18,9 +21,7 @@ struct list_node {
     long long size;
     bool deleted;
     list_node *prev, *next;
-
     list_node() {};
-
     list_node(long long index, long long size, bool deleted) : index(index), size(size), prev(NULL), next(NULL), deleted(deleted) {};
 };
 
@@ -34,7 +35,6 @@ inline void put_in_map(p_treap_node &treap_node) {
 struct Treap {
     p_treap_node notFound;
     p_treap_node root;
-
     Treap() {
         notFound = new treap_node(-1,-1, NULL, 1);
         root = NULL;
@@ -42,8 +42,7 @@ struct Treap {
 
 private:
     void split(p_treap_node curr, long long key, p_treap_node &l, p_treap_node &r) {
-        if (curr == NULL)
-            l = r = NULL;
+        if (curr == NULL) l = r = NULL;
         else if (key < curr->key) {
             split(curr->l, key, l, curr->l);
             r = curr;
@@ -120,10 +119,8 @@ public:
 };
 
 Treap t;
-p_list_node head;
-p_list_node last;
-unordered_map<string, p_list_node> nameToList;
-long long left_space, disk_size;
+
+
 
 inline long long returnNUM(string s) {
     long long ind = s.find_first_of('b') - 1;
@@ -141,14 +138,10 @@ inline void add(long long &curr_size, long long segment_size, long long &left) {
     left -= to_add;
 }
 
-inline void precentage(long long empty) {
-    long long size = disk_size / 8;
-    empty *= 4;
-    if (empty <= size) {
-        cout << "[#]";
-    } else if (empty > size && empty <= 3 * size) {
-        cout <<"[-]";
-    } else cout << "[ ]";
+inline void precentage(long long empty, long long size_of_segment) {
+    if (4*empty <= size_of_segment) cout << "[#]";
+    else if (4*empty > size_of_segment && 4*empty <= 3 * size_of_segment) cout <<"[-]";
+    else cout << "[ ]";
 }
 
 void print_disk() {
@@ -170,7 +163,7 @@ void print_disk() {
                 add(full, size_of_segment - empty, left_full);
             }
         }
-        precentage(empty);
+        precentage(empty, size_of_segment);
     }
     cout << "\n";
 }
