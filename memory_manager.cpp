@@ -43,7 +43,7 @@ struct Treap {
 private:
     void split(p_treap_node curr, long long key, p_treap_node &l, p_treap_node &r) {
         if (curr == NULL) l = r = NULL;
-        else if (key < curr->key) {
+        else if (key <= curr->key) {
             split(curr->l, key, l, curr->l);
             r = curr;
             put_in_map(r);
