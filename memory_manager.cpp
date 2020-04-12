@@ -63,7 +63,7 @@ private:
             curr = it;
             put_in_map(curr);
         }
-        else insert(it->key < curr->key ? curr->l : curr->r, it);
+        else insert(it->key <= curr->key ? curr->l : curr->r, it);
     }
 
 
