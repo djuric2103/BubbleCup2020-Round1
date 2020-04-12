@@ -38,6 +38,7 @@ struct Treap {
     p_treap_node notFound;
     p_treap_node root;
     Treap() {
+        //srand(2);
         notFound = new treap_node(-1, NULL);
         root = NULL;
     }
@@ -45,7 +46,7 @@ struct Treap {
 private:
     void split(p_treap_node curr, long long key, p_treap_node &l, p_treap_node &r) {
         if (curr == NULL) l = r = NULL;
-        else if (key <= curr->key) {
+        else if (key < curr->key) {
             split(curr->l, key, l, curr->l);
             r = curr;
             put_in_map(r);
@@ -65,7 +66,7 @@ private:
             curr = it;
             put_in_map(curr);
         }
-        else insert(it->key < curr->key ? curr->l : curr->r, it);
+        else insert(it->key <= curr->key ? curr->l : curr->r, it);
     }
 
 
