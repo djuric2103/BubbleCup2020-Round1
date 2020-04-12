@@ -86,7 +86,7 @@ private:
         if (curr->key == size) return curr;
         if(curr -> key < size) return getFirst(curr -> r, size);
         p_treap_node& temp = getFirst(curr->l, size);
-        if (temp == notFound || temp -> key >= curr -> key) return curr;
+        if (temp == notFound || temp -> key == curr -> key) return curr;
         return temp;
     }
 
