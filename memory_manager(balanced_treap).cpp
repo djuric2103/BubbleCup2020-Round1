@@ -38,7 +38,7 @@ struct Treap {
     p_treap_node notFound;
     p_treap_node root;
     Treap() {
-        //srand(2);
+        srand(1001);
         notFound = new treap_node(-1, NULL);
         root = NULL;
     }
@@ -89,7 +89,7 @@ private:
         //if (curr->key == size) return curr;
         if(curr -> key < size) return getFirst(curr -> r, size);
         p_treap_node& temp = getFirst(curr->l, size);
-        if (temp == notFound || temp -> key > curr -> key || (temp -> key == curr -> key && temp -> list_node -> index > curr -> list_node -> index)) return curr;
+        if (temp == notFound || (temp -> key == curr -> key && temp -> list_node -> index > curr -> list_node -> index)) return curr;
         return temp;
     }
 
