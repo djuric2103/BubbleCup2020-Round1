@@ -1,15 +1,16 @@
 //#pragma GCC optimize ("Ofast")
 #include <bits/stdc++.h>
 #define greatest 43956562
+#define limit 2275147
 #define logn 25
 using namespace std;
 const int maxn = greatest + 2;
 int ludic[maxn / 64 + 10];
-int offset[2275147];
+int offset[limit];
 const int BIT_SIZE = maxn - 1;
 int BIT[maxn];
-int sol[2275147];
-int sol_size = 0;
+int sol[limit];
+int k = limit, sol_size = limit;
 
 inline void update(int x, int v) {
     while (x < BIT_SIZE) BIT[x] += v, x += x & -x;
@@ -76,7 +77,6 @@ inline int binary(int q){
     return ans;
 }
 
-int k = 2275147;
 
 inline int return_num(int n){
     int additional = n - greatest;
@@ -95,7 +95,7 @@ int main(){
     int t;
     scanf("%d",&t);
     bitWiseSieve(greatest);
-    sol_size = 2275147;
+
     vector<int> qu;
     vector<int> so;
     for(int i = 0; i < t; i++){
