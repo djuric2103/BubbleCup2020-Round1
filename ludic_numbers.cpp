@@ -1,4 +1,3 @@
-//#pragma GCC optimize ("Ofast")
 #include <bits/stdc++.h>
 #define greatest 43956562
 #define limit 2275147
@@ -50,15 +49,12 @@ void bitWiseSieve(int n){
                     int k = query(j);
                     if (k >= n + 1) break;
                     ludic[k/64] |= (1 << ((k >> 1) & 31));
-                    //ludic[k/2] = true;
-                    //j--;
+
                     left--;
                     s += (i - 1);
                     update(k, -1);
                 }
-                //update(2,0-ob);
                 offset[curr - 1] = left - s;
-
                 continue;
             }
             if(sum_n == -1) sum_n = sum(n);
@@ -76,9 +72,12 @@ inline int binary(int q){
     }
     return ans;
 }
+unordered_map<int, int> a;
 
-
-inline int return_num(int n){
+int return_num(int n){
+    if(a.find(n) != a.end()) {
+        return a.find(n)->second;
+    }
     int additional = n - greatest;
     int cout = 0;
     for(int i = 1; i < k;  i++){
@@ -88,7 +87,13 @@ inline int return_num(int n){
         additional -= toRem;
     }
     k -= cout;
-    return additional + sol_size;
+    int res = additional + sol_size;
+    if(n % 2 == 0){
+        a.insert({n - 1, res});
+    }else{
+        a.insert({n + 1, res});
+    }
+    return res;
 }
 
 int main(){
@@ -96,15 +101,14 @@ int main(){
     scanf("%d",&t);
     bitWiseSieve(greatest);
 
-    vector<int> qu;
-    vector<int> so;
+    vector<int> qu(t);
+    vector<int> so(t);
     for(int i = 0; i < t; i++){
         int temp;
         scanf("%d",&temp);
-        qu.push_back(temp);
-        so.push_back(temp);
+        qu[i] = temp;
+        so[i] = temp;
     }
-    unordered_map<int, int> a;
     sort(so.begin(), so.end());
 
     for(int i = t - 1; i >= 0; i--){
