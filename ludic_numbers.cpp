@@ -4,16 +4,12 @@
 #define logn 25
 #define lastRem 2142957
 using namespace std;
-const int maxn = greatest + 2;
-int ludic[maxn / 64 + 10];
-int offset[limit];
-const int BIT_SIZE = maxn - 1;
-int BIT[maxn];
-int sol[limit];
+const int maxn = greatest + 2, BIT_SIZE = maxn - 1;
+int ludic[maxn / 64 + 10], offset[limit], BIT[maxn], sol[limit];
 int k = limit, sol_size = limit, previous = greatest, prev_sol = sol_size;
 unordered_map<int, int> a;
 
-inline void update(int x, int v) {
+inline void update(int x, const int v) {
     while (x < BIT_SIZE) BIT[x] += v, x += x & -x;
 }
 
@@ -23,7 +19,7 @@ inline int sum(int x) {
     return ret;
 }
 
-inline int query(int x) {
+inline int query(const int x) {
     int sum = 0, ret = 0;
     for (int i = logn; i >= 0; --i)
         if (ret + (1 << i) < BIT_SIZE && sum + BIT[ret + (1 << i)] < x)
@@ -32,7 +28,7 @@ inline int query(int x) {
     return ++ret;
 }
 
-void bitWiseSieve(int n){
+void bitWiseSieve(const int n){
     for (int i = 1; i <= n; ++i) BIT[i] = i & -i;
     for (int i = 2; i <= n; i += 2) BIT[i] /= 2;
     for (int i = 0; i <= logn; ++i) BIT[1 << i]++;
@@ -121,14 +117,14 @@ int main(){
     scanf("%d",&t);
     bitWiseSieve(greatest);
 
-    vector<int> qu(t);
-    vector<int> so(t);
+    vector<int> qu(t), so(t);
     for(int i = 0; i < t; ++i){
         int temp;
         scanf("%d",&temp);
         qu[i] = temp;
         so[i] = temp;
     }
+
     sort(so.begin(), so.end());
 
     if(so[t - 1] - so[t/2] < 1e6) {
