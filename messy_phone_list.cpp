@@ -1,26 +1,29 @@
 #include <bits/stdc++.h>
-
+#define MAX 1e9
 using namespace std;
 
 string defaultCode;
 
-vector<string> split(const string &str, const string &delim) {
-    vector<string> tokens;
-    size_t prev = 0, pos = 0;
-    do {
-        pos = str.find(delim, prev);
-        if (pos == string::npos) pos = str.length();
-        string token = str.substr(prev, pos - prev);
-        if (!token.empty()) tokens.push_back(token);
-        prev = pos + delim.length();
-    } while (pos < str.length() && prev < str.length());
-    return tokens;
-}
+struct pairhash {
+public:
+    template <typename T, typename U>
+    size_t operator()(const pair<T, U> &x) const{
+        return hash<T>()(x.first) ^ hash<U>()(x.second);
+    }
+    template <typename T, typename U, typename V>
+    size_t operator()(const pair<pair<T, U >, V> &x) const{
+        return hash<T>()(x.first.first) ^ hash<U>()(x.first.second) ^ hash<V>()(x.second);
+    }
+    template <typename T, typename U, typename V, typename Q>
+    size_t operator()(const pair<pair<T, U >, pair<V, Q>> &x) const{
+        return hash<T>()(x.first.first) ^ hash<U>()(x.first.second) ^ hash<V>()(x.second.first) ^ hash<Q>()(x.second.second);
+    }
+};
 
 string validName(string f) {
     int fsize = f.size();
     f[0] = toupper(f[0]);
-    for (int i = 1; i < fsize; i++) {
+    for (int i = 1; i < fsize; ++i) {
         f[i] = tolower(f[i]);
     }
     return f;
@@ -30,7 +33,6 @@ typedef struct phone_number {
     string code, number;
 
     phone_number() {
-
     }
 
     phone_number(string c, string n) {
@@ -90,57 +92,28 @@ bool operator<(contact c1, contact c2) {
     return c1.fname.compare(c2.fname) < 0;
 }
 
-int firstDigit(const string &s) {
-    for (int i = 0; i < s.length(); i++) {
-        if (isdigit(s[i]))
-            return i;
-    }
-    return -1;
-}
-
-int firstLetter(const string &s) {
-    for (int i = 0; i < s.length(); i++) {
-        if (isalpha(s[i]))
-            return i;
-    }
-    return -1;
-}
-
-int findDelimeter(const string &s) {
-    for (int i = 0; i < s.length(); i++) {
-        if (s[i] == '-' || s[i] == '/')
-            return i;
-    }
-    return -1;
-}
-
-string additionWithSpace(string s1, string s2){
-    ostringstream os;
-    os << s1;
-    os << " ";
-    os << s2;
-    return os.str();
-}
-
 int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
     int t;
     cin >> t;
 
     while (t--) {
         int n;
         cin >> n >> defaultCode;
-        scanf("\n");
         vector<contact> list;
-        cin.clear();
-        unordered_map<string, int> nameToInd;
-        unordered_map<string, int> numberToIndices;
-        unordered_set<string> name_num;
+        cin.ignore();
+        unordered_map<pair<string, string>, int, pairhash> nameToInd;
+        unordered_map<pair<string, string>, int, pairhash> numberToIndices;
+        unordered_set<pair<pair<string,string>, pair<string, string>>, pairhash> name_num;
         int inserted = 0;
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; ++i) {
             string response;
             getline(cin, response);
-            int ind_dig = firstDigit(response);
-            int ind_letter = firstLetter(response);
+            int ind_dig = response.find_first_of("0123456789");
+            int ind_letter = response.find_first_not_of("0123456789/,- ");
             string numberpart, namepart;
             if (ind_dig < ind_letter) {
                 numberpart = response.substr(0, ind_letter - 1);
@@ -150,17 +123,18 @@ int main() {
                 numberpart = response.substr(ind_dig);
             }
             string fname, sname;
-            if (namepart.find(' ') != -1) {
-                vector<string> r = split(namepart, " ");
-                fname = r[0];
-                sname = r[1];
+            int del_ind = namepart.find(' ');
+            if (del_ind != -1) {
+                fname = namepart.substr(0, del_ind);
+                sname = namepart.substr(del_ind + 1);
             } else {
-                vector<string> r = split(namepart, ",");
-                fname = r[1];
-                sname = r[0];
+                del_ind = namepart.find(',');
+                sname = namepart.substr(0, del_ind);
+                fname = namepart.substr(del_ind + 1);
             }
-            numberpart.erase(std::remove(numberpart.begin(), numberpart.end(), ' '), numberpart.end());
-            int ind = findDelimeter(numberpart);
+
+            numberpart.erase(remove(numberpart.begin(), numberpart.end(), ' '), numberpart.end());
+            int ind = numberpart.find_first_of("-/");
             contact c(fname, sname);
             phone_number p;
             if (ind != -1) {
@@ -170,7 +144,7 @@ int main() {
                 phone_number p1(numberpart);
                 p = p1;
             }
-            string keyName(additionWithSpace(c.fname, c.sname));
+            pair<string, string> keyName = {c.fname, c.sname};
             int index = -1;
             if (nameToInd.find(keyName) != nameToInd.end()) {
                 index = nameToInd[keyName];
@@ -182,37 +156,30 @@ int main() {
                 nameToInd[keyName] = index;
                 list.push_back(c);
             }
-            string keyNumber(additionWithSpace(p.code, p.number));
+            pair<string, string> keyNumber = {p.code, p.number};
 
-            if (name_num.find(additionWithSpace(keyName, keyNumber)) == name_num.end()) {
-                if(numberToIndices.find(keyNumber) == numberToIndices.end()) {
-                    numberToIndices[keyNumber] = index;
-                }
-                else if(index != numberToIndices[keyNumber] ){
-                    numberToIndices[keyNumber] = 1 << 20;
-                }
-                name_num.insert(additionWithSpace(keyName, keyNumber));
+            if (name_num.find({keyName, keyNumber}) == name_num.end()) {
+                if(numberToIndices.find(keyNumber) == numberToIndices.end()) numberToIndices[keyNumber] = index;
+                else if(index != numberToIndices[keyNumber] ) numberToIndices[keyNumber] = MAX;
+                name_num.insert({keyName, keyNumber});
             }
         }
-        
+
         int good = 0;
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < list.size(); ++i) {
             vector<phone_number> nums = list[i].numbers;
 
-            for (int j = nums.size() - 1; j >= 0; j--) {
-                if(numberToIndices[additionWithSpace(nums[j].code, nums[j].number)] == i){
+            for (int j = nums.size() - 1; j >= 0; --j) {
+                if(numberToIndices[{nums[j].code, nums[j].number}] == i){
                     good++;
                     list[i].set_correct(j);
                     break;
                 }
             }
         }
-        cout << good << endl;
+        cout << good << "\n";
         sort(list.begin(), list.end());
-        for(auto u : list){
-            u.print();
-        }
+        for(int i = 0; i < list.size(); list[i].print(), ++i);
     }
-
     return 0;
 }
