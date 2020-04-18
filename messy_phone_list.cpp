@@ -73,7 +73,6 @@ typedef struct contact {
 
     void addNumber(phone_number n) {
         numbers.push_back(n);
-        print();
     }
 
     void set_correct(int j) {
