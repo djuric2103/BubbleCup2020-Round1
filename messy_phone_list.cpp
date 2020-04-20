@@ -84,13 +84,6 @@ bool operator==(const contact &c1, const contact &c2) {
     return c1.fname.compare(c2.fname) == 0 && c1.sname.compare(c2.sname) == 0;
 }
 
-bool operator<(contact c1, contact c2) {
-    int r = c1.sname.compare(c2.sname);
-    if (r != 0)
-        return r < 0;
-    return c1.fname.compare(c2.fname) < 0;
-}
-
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
@@ -164,21 +157,27 @@ int main() {
             }
         }
 
-        int good = 0;
+        vector<contact*> correct;
+
         for (int i = 0; i < list.size(); ++i) {
             vector<phone_number> nums = list[i].numbers;
 
             for (int j = nums.size() - 1; j >= 0; --j) {
                 if(numberToIndices[{nums[j].code, nums[j].number}] == i){
-                    good++;
                     list[i].set_correct(j);
+                    correct.push_back(&list[i]);
                     break;
                 }
             }
         }
-        cout << good << "\n";
-        sort(list.begin(), list.end());
-        for(int i = 0; i < list.size(); list[i].print(), ++i);
+        cout << correct.size() << '\n';
+        sort(correct.begin(), correct.end(), [](contact* a, contact *b) -> bool {
+            int r = a -> sname.compare(b -> sname);
+            if (r != 0)
+                return r < 0;
+            return a -> fname.compare(b -> fname) < 0;
+        });
+        for(int i = 0; i < correct.size(); correct[i] -> print(), ++i);
     }
     return 0;
 }
