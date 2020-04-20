@@ -159,7 +159,7 @@ int main()
             {
                 continue;
             }
-            double costEstimate = k * euclidianDistance(coords[allEdges[i].first], coords[allEdges[i].second]) + 10.0 * l * intersectionCount[i] / (m - result.size());
+            double costEstimate = k * euclidianDistance(coords[allEdges[i].first], coords[allEdges[i].second]) + 9.0 * l * intersectionCount[i] / (n - result.size());
             for (int j = 0; j < result.size(); j++)
             {
                 if (intersect(coords[allEdges[i].first], coords[allEdges[i].second], coords[allEdges[result[j]].first], coords[allEdges[result[j]].second]))
@@ -177,14 +177,17 @@ int main()
             {
                 continue;
             }
-            for (int j = i + 1; j < options.size(); j++)
+            if (result.size() != n - 2)
             {
-                if (intersect(coords[allEdges[options[i].second].first], coords[allEdges[options[i].second].second], coords[allEdges[options[j].second].first], coords[allEdges[options[j].second].second]))
+                for (int j = i + 1; j < options.size(); j++)
                 {
-                    options[j].first += l;
-                    options[j].first -= 10.0 * intersectionCount[options[j].second] / (m - result.size());
-                    intersectionCount[options[j].second]--;
-                    options[j].first += 10.0 * intersectionCount[options[j].second] / (m - (result.size() + 1));
+                    if (intersect(coords[allEdges[options[i].second].first], coords[allEdges[options[i].second].second], coords[allEdges[options[j].second].first], coords[allEdges[options[j].second].second]))
+                    {
+                        options[j].first += l;
+                        options[j].first -= 9.0 * l * intersectionCount[options[j].second] / (n - result.size());
+                        intersectionCount[options[j].second]--;
+                        options[j].first += 9.0 * l * intersectionCount[options[j].second] / (n - (result.size() + 1));
+                    }
                 }
             }
             uni(allEdges[options[i].second].first, allEdges[options[i].second].second, parent);
