@@ -159,7 +159,7 @@ int main()
             {
                 continue;
             }
-            double costEstimate = k * euclidianDistance(coords[allEdges[i].first], coords[allEdges[i].second]) + l * intersectionCount[i] / (1.0 * (m - result.size()));
+            double costEstimate = k * euclidianDistance(coords[allEdges[i].first], coords[allEdges[i].second]) + 10.0 * l * intersectionCount[i] / (m - result.size());
             for (int j = 0; j < result.size(); j++)
             {
                 if (intersect(coords[allEdges[i].first], coords[allEdges[i].second], coords[allEdges[result[j]].first], coords[allEdges[result[j]].second]))
@@ -182,9 +182,9 @@ int main()
                 if (intersect(coords[allEdges[options[i].second].first], coords[allEdges[options[i].second].second], coords[allEdges[options[j].second].first], coords[allEdges[options[j].second].second]))
                 {
                     options[j].first += l;
-                    options[j].first -= 1.0 * intersectionCount[options[j].second] / (m - result.size());
+                    options[j].first -= 10.0 * intersectionCount[options[j].second] / (m - result.size());
                     intersectionCount[options[j].second]--;
-                    options[j].first += 1.0 * intersectionCount[options[j].second] / (m - (result.size() + 1));
+                    options[j].first += 10.0 * intersectionCount[options[j].second] / (m - (result.size() + 1));
                 }
             }
             uni(allEdges[options[i].second].first, allEdges[options[i].second].second, parent);
